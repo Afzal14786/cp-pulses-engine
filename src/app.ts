@@ -1,4 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
+import path from 'path';
 import { asc, gt } from "drizzle-orm";
 import { ZodError } from "zod";
 import { env } from "./config/env";
@@ -12,6 +13,7 @@ import { logger } from "./shared/logger";
 
 const app = express();
 app.use(express.json());
+app.use(express.static(path.join(__dirname, '../public')));
 
 const ingestionService = new IngestionService();
 
