@@ -1,342 +1,963 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PulseCP — Contest Notification Engine</title>
-  
-  <!-- Tailwind CSS Play CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: { 50: '#eef2ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' }
-          }
-        }
-      }
-    }
-  </script>
-
-  <!-- Google Inter Font & Lucide Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="description"
+    content="A simple competitive programming contest tracker."
+  />
+  <title>CP Pulses — Contest Tracker</title>
 
   <style>
-    body { font-family: 'Inter', sans-serif; }
-    .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.5); }
-    .glow-effect { box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.2); }
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #172033;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --accent: #2563eb;
+      --accent-light: #eff6ff;
+      --green: #15803d;
+      --green-light: #f0fdf4;
+      --orange: #c2410c;
+      --orange-light: #fff7ed;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(1080px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    /* Header */
+
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-inner {
+      min-height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      border-radius: 10px;
+      background: var(--accent-light);
+      color: var(--accent);
+      font-family: monospace;
+      font-size: 19px;
+      font-weight: 700;
+    }
+
+    .brand-name {
+      font-size: 17px;
+      font-weight: 750;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-subtitle {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #94a3b8;
+    }
+
+    .status-dot.online {
+      background: #16a34a;
+    }
+
+    /* Main */
+
+    main {
+      padding: 38px 0 56px;
+    }
+
+    .page-heading {
+      margin-bottom: 26px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: 1.1px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(25px, 4vw, 34px);
+      line-height: 1.2;
+      letter-spacing: -1px;
+    }
+
+    .page-description {
+      max-width: 600px;
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* Summary */
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 26px;
+    }
+
+    .summary-card {
+      padding: 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .summary-value {
+      margin-top: 5px;
+      font-size: 26px;
+      font-weight: 750;
+      line-height: 1.3;
+      letter-spacing: -0.8px;
+    }
+
+    /* Contest section */
+
+    .section {
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .section-subtitle {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .button {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 7px;
+      min-height: 37px;
+      padding: 8px 13px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 650;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .button:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+
+    .button-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .button-primary:hover {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+    }
+
+    .filters {
+      display: flex;
+      gap: 10px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .search {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .control {
+      width: 100%;
+      min-height: 39px;
+      padding: 9px 11px;
+      outline: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .control:focus {
+      border-color: #93b4fc;
+      box-shadow: 0 0 0 3px #dbeafe;
+    }
+
+    .platform-select {
+      width: 180px;
+      flex-shrink: 0;
+    }
+
+    /* Contest list */
+
+    .contest-list {
+      padding: 0 20px;
+    }
+
+    .contest {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 18px;
+      padding: 19px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .contest:last-child {
+      border-bottom: none;
+    }
+
+    .contest-main {
+      min-width: 0;
+    }
+
+    .contest-topline {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 7px;
+    }
+
+    .platform {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .contest-title {
+      margin: 0;
+      overflow-wrap: anywhere;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .contest-title a:hover {
+      color: var(--accent);
+    }
+
+    .contest-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px 16px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .contest-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .countdown {
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .countdown.soon {
+      color: var(--orange);
+    }
+
+    .contest-link {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 34px;
+      padding: 7px 12px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: #334155;
+      font-size: 12px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .contest-link:hover {
+      border-color: #93b4fc;
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .message {
+      padding: 36px 20px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .message strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .message p {
+      margin: 0;
+      font-size: 12px;
+    }
+
+    /* Footer */
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 2px 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .footer code {
+      color: #475569;
+    }
+
+    /* Mobile */
+
+    @media (max-width: 640px) {
+      .container {
+        width: calc(100% - 24px);
+      }
+
+      .header-inner {
+        min-height: 62px;
+      }
+
+      main {
+        padding-top: 27px;
+      }
+
+      .brand-subtitle {
+        font-size: 11px;
+      }
+
+      .header-status {
+        gap: 6px;
+        font-size: 11px;
+      }
+
+      .summary {
+        gap: 8px;
+      }
+
+      .summary-card {
+        padding: 13px 11px;
+      }
+
+      .summary-label {
+        font-size: 11px;
+      }
+
+      .summary-value {
+        font-size: 22px;
+      }
+
+      .section-header {
+        padding: 16px 13px;
+      }
+
+      .filters {
+        flex-direction: column;
+        padding: 13px;
+      }
+
+      .platform-select {
+        width: 100%;
+      }
+
+      .contest-list {
+        padding: 0 13px;
+      }
+
+      .contest {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+        padding: 16px 0;
+      }
+
+      .contest-actions {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .contest-title {
+        font-size: 14px;
+      }
+
+      .footer {
+        flex-direction: column;
+        gap: 5px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .header-status span:last-child {
+        display: none;
+      }
+
+      .summary-value {
+        font-size: 19px;
+      }
+
+      .section-header {
+        align-items: flex-start;
+      }
+    }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white pb-20">
 
-  <!-- Top Navigation Bar -->
-  <header class="sticky top-0 z-50 glass-card border-b border-slate-800 px-4 py-3 flex items-center justify-between">
-    <div class="flex items-center space-x-3">
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center glow-effect shadow-indigo-500/30">
-        <i data-lucide="zap" class="w-5 h-5 text-white"></i>
-      </div>
-      <div>
-        <h1 class="font-bold text-base leading-tight tracking-tight flex items-center gap-1.5">
-          PulseCP <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 font-medium">v1.0</span>
-        </h1>
-        <p class="text-xs text-slate-400">Live CP Contest Alerter</p>
-      </div>
-    </div>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a class="brand" href="/" aria-label="CP Pulses home">
+        <div class="brand-icon" aria-hidden="true">&lt;/&gt;</div>
+        <div>
+          <div class="brand-name">CP Pulses</div>
+          <div class="brand-subtitle">Competitive programming</div>
+        </div>
+      </a>
 
-    <div class="flex items-center space-x-2">
-      <button onclick="triggerTestAlert()" id="testAlertBtn" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition active:scale-95 shadow-lg shadow-indigo-600/20">
-        <i data-lucide="bell" class="w-3.5 h-3.5"></i>
-        <span>Test Alert</span>
-      </button>
-      <button onclick="fetchContests()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition active:scale-95">
-        <i data-lucide="refresh-cw" class="w-4 h-4" id="refreshIcon"></i>
-      </button>
+      <div class="header-status">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Connecting…</span>
+      </div>
     </div>
   </header>
 
-  <!-- Toast Notification Banner -->
-  <div id="toast" class="fixed top-16 left-4 right-4 z-50 transform -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none max-w-md mx-auto">
-    <div id="toastContent" class="glass-card px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 border-l-4 border-indigo-500">
-      <i data-lucide="info" class="w-5 h-5 text-indigo-400 shrink-0" id="toastIcon"></i>
-      <span class="text-xs font-medium text-slate-200" id="toastMessage">Notification message here</span>
-    </div>
-  </div>
+  <main class="container">
+    <section class="page-heading">
+      <p class="eyebrow">Contest dashboard</p>
+      <h1>Upcoming contests</h1>
+      <p class="page-description">
+        Keep track of programming contests in one place.
+        Find your next contest and plan your practice.
+      </p>
+    </section>
 
-  <!-- Main Container -->
-  <main class="max-w-xl w-full mx-auto p-4 space-y-5 flex-1">
-
-    <!-- Platform Filter Tabs -->
-    <div class="flex items-center space-x-2 overflow-x-auto pb-1 no-scrollbar">
-      <button onclick="filterContests('ALL')" class="platform-tab px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition shrink-0" data-platform="ALL">All Platforms</button>
-      <button onclick="filterContests('CODEFORCES')" class="platform-tab px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 transition shrink-0" data-platform="CODEFORCES">Codeforces</button>
-      <button onclick="filterContests('LEETCODE')" class="platform-tab px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 transition shrink-0" data-platform="LEETCODE">LeetCode</button>
-      <button onclick="filterContests('CODECHEF')" class="platform-tab px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 transition shrink-0" data-platform="CODECHEF">CodeChef</button>
-      <button onclick="filterContests('ATCODER')" class="platform-tab px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 transition shrink-0" data-platform="ATCODER">AtCoder</button>
-    </div>
-
-    <!-- Contests Section -->
-    <section class="space-y-3">
-      <div class="flex items-center justify-between">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-          <i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-400"></i> Upcoming Contests
-        </h2>
-        <span class="text-xs text-slate-500 font-medium" id="contestCount">Loading...</span>
+    <section class="summary" aria-label="Contest summary">
+      <div class="summary-card">
+        <div class="summary-label">Total contests</div>
+        <div class="summary-value" id="totalCount">—</div>
       </div>
 
-      <div id="contestsList" class="space-y-3">
-        <!-- Dynamic Contest Cards Render Here -->
-        <div class="glass-card p-6 rounded-xl text-center space-y-2">
-          <div class="inline-block p-3 rounded-full bg-slate-800/80 animate-pulse text-indigo-400">
-            <i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i>
-          </div>
-          <p class="text-xs text-slate-400">Syncing contests from platforms...</p>
+      <div class="summary-card">
+        <div class="summary-label">Starting in 24 hours</div>
+        <div class="summary-value" id="soonCount">—</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-label">Platforms</div>
+        <div class="summary-value" id="platformCount">—</div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Contest schedule</h2>
+          <p class="section-subtitle" id="lastUpdated">
+            Fetching the latest contest data…
+          </p>
+        </div>
+
+        <button class="button" id="refreshButton" type="button">
+          ↻ Refresh
+        </button>
+      </div>
+
+      <div class="filters">
+        <div class="search">
+          <input
+            class="control"
+            id="searchInput"
+            type="search"
+            placeholder="Search contests or platforms…"
+            aria-label="Search contests"
+          />
+        </div>
+
+        <select
+          class="control platform-select"
+          id="platformFilter"
+          aria-label="Filter by platform"
+        >
+          <option value="all">All platforms</option>
+        </select>
+      </div>
+
+      <div id="contestList" class="contest-list" aria-live="polite">
+        <div class="message">
+          <strong>Loading contests</strong>
+          Please wait while we fetch the schedule.
         </div>
       </div>
     </section>
 
-    <!-- User Channels & Settings Section -->
-    <section class="space-y-3 pt-2">
-      <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-        <i data-lucide="settings" class="w-3.5 h-3.5 text-indigo-400"></i> Notification Channels
-      </h2>
-
-      <div class="glass-card rounded-xl p-4 space-y-3">
-        <div class="flex items-center justify-between text-xs border-b border-slate-800/60 pb-2.5">
-          <div class="flex items-center space-x-2.5">
-            <div class="w-7 h-7 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center">
-              <i data-lucide="smartphone" class="w-4 h-4"></i>
-            </div>
-            <div>
-              <p class="font-semibold text-slate-200">Mobile Push (ntfy)</p>
-              <p class="text-[11px] text-slate-400 truncate max-w-[180px]" id="ntfyTopicDisplay">afzal-cp-alerts-secret</p>
-            </div>
-          </div>
-          <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-400">Active</span>
-        </div>
-
-        <div class="flex items-center justify-between text-xs border-b border-slate-800/60 pb-2.5">
-          <div class="flex items-center space-x-2.5">
-            <div class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
-              <i data-lucide="mail" class="w-4 h-4"></i>
-            </div>
-            <div>
-              <p class="font-semibold text-slate-200">Email SMTP</p>
-              <p class="text-[11px] text-slate-400 truncate max-w-[180px]" id="emailDisplay">mdafzal14777@gmail.com</p>
-            </div>
-          </div>
-          <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-400">Active</span>
-        </div>
-
-        <div class="flex items-center justify-between text-xs">
-          <div class="flex items-center space-x-2.5">
-            <div class="w-7 h-7 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center">
-              <i data-lucide="send" class="w-4 h-4"></i>
-            </div>
-            <div>
-              <p class="font-semibold text-slate-200">Telegram Bot</p>
-              <p class="text-[11px] text-slate-400 truncate max-w-[180px]" id="telegramDisplay">ID: 5645101857</p>
-            </div>
-          </div>
-          <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-400">Active</span>
-        </div>
-      </div>
-    </section>
-
+    <footer class="footer">
+      <span>CP Pulses · Built for competitive programmers</span>
+      <span>API: <code>/api/contests/upcoming</code></span>
+    </footer>
   </main>
 
-  <!-- Bottom Navigation Bar for Mobile PWA Feel -->
-  <nav class="fixed bottom-0 left-0 right-0 glass-card border-t border-slate-800 px-6 py-3 flex items-center justify-around z-40 max-w-md mx-auto rounded-t-2xl">
-    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex flex-col items-center text-indigo-400 space-y-1">
-      <i data-lucide="compass" class="w-5 h-5"></i>
-      <span class="text-[10px] font-semibold">Discover</span>
-    </button>
-    <button onclick="triggerSync()" class="flex flex-col items-center text-slate-400 hover:text-indigo-400 transition space-y-1">
-      <i data-lucide="refresh-cw" class="w-5 h-5" id="syncNavIcon"></i>
-      <span class="text-[10px] font-medium">Sync Data</span>
-    </button>
-    <button onclick="showToast('PulseCP Engine is running 24/7 on background workers!', 'success')" class="flex flex-col items-center text-slate-400 hover:text-indigo-400 transition space-y-1">
-      <i data-lucide="shield-check" class="w-5 h-5"></i>
-      <span class="text-[10px] font-medium">System OK</span>
-    </button>
-  </nav>
-
-  <!-- App Frontend Logic -->
   <script>
-    const API_BASE = ''; // Same origin or http://localhost:4000
-    const SEEDED_USER_ID = '714c557b-08a2-41c4-a93d-d5aee9677a07';
-    let allContests = [];
-    let currentFilter = 'ALL';
+    "use strict";
 
-    // Platform badge color mapping
-    const platformColors = {
-      CODEFORCES: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-      LEETCODE: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-      CODECHEF: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-      ATCODER: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+    const API_URL = "/api/contests/upcoming";
+
+    const elements = {
+      statusDot: document.getElementById("statusDot"),
+      statusText: document.getElementById("statusText"),
+      totalCount: document.getElementById("totalCount"),
+      soonCount: document.getElementById("soonCount"),
+      platformCount: document.getElementById("platformCount"),
+      lastUpdated: document.getElementById("lastUpdated"),
+      contestList: document.getElementById("contestList"),
+      refreshButton: document.getElementById("refreshButton"),
+      searchInput: document.getElementById("searchInput"),
+      platformFilter: document.getElementById("platformFilter")
     };
 
-    function showToast(message, type = 'info') {
-      const toast = document.getElementById('toast');
-      const msgEl = document.getElementById('toastMessage');
-      const iconEl = document.getElementById('toastIcon');
-      
-      msgEl.textContent = message;
-      toast.classList.remove('-translate-y-20', 'opacity-0');
-      toast.classList.add('translate-y-0', 'opacity-100');
+    let contests = [];
 
-      setTimeout(() => {
-        toast.classList.remove('translate-y-0', 'opacity-100');
-        toast.classList.add('-translate-y-20', 'opacity-0');
-      }, 4000);
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, character => {
+        const entities = {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;"
+        };
+
+        return entities[character];
+      });
     }
 
-    async function fetchContests() {
-      const listEl = document.getElementById('contestsList');
-      const countEl = document.getElementById('contestCount');
+    function getStartTime(contest) {
+      const value =
+        contest.startTimeIst ??
+        contest.startTime ??
+        contest.start_time ??
+        contest.startTimeUTC ??
+        contest.start_time_utc;
+
+      if (value == null) return NaN;
+
+      // Support Unix timestamps in seconds or milliseconds.
+      if (typeof value === "number" || /^\d+$/.test(String(value))) {
+        const number = Number(value);
+
+        if (!Number.isFinite(number)) return NaN;
+
+        return number < 1e12 ? number * 1000 : number;
+      }
+
+      return Date.parse(value);
+    }
+
+    function getDuration(contest) {
+      const value =
+        contest.durationSeconds ??
+        contest.duration_seconds ??
+        contest.duration ??
+        0;
+
+      const number = Number(value);
+
+      return Number.isFinite(number) && number > 0 ? number : 0;
+    }
+
+    function getPlatform(contest) {
+      return String(
+        contest.platform ??
+        contest.site ??
+        contest.source ??
+        "Other"
+      );
+    }
+
+    function getContestName(contest) {
+      return String(
+        contest.name ??
+        contest.title ??
+        "Untitled contest"
+      );
+    }
+
+    function getContestURL(contest) {
+      const value = contest.url ?? contest.href ?? "";
       
       try {
-        const res = await fetch(`${API_BASE}/api/contests/upcoming`);
-        const data = await res.json();
-        
-        allContests = data.contests || [];
-        renderContests();
-      } catch (err) {
-        console.error(err);
-        listEl.innerHTML = `
-          <div class="glass-card p-6 rounded-xl text-center space-y-2 border-red-500/30">
-            <i data-lucide="alert-triangle" class="w-6 h-6 text-red-400 mx-auto"></i>
-            <p class="text-xs text-red-300 font-medium">Failed to connect to PulseCP API server.</p>
-            <p class="text-[10px] text-slate-500">Ensure 'npm run dev:api' is running on port 4000.</p>
-          </div>
-        `;
-        lucide.createIcons();
+        const parsed = new URL(value, window.location.origin);
+
+        if (parsed.protocol === "https:" || parsed.protocol === "http:") {
+          return parsed.href;
+        }
+      } catch {
+        // Ignore invalid URLs.
       }
+
+      return "";
     }
 
-    function filterContests(platform) {
-      currentFilter = platform;
-      document.querySelectorAll('.platform-tab').forEach(btn => {
-        if (btn.dataset.platform === platform) {
-          btn.className = 'platform-tab px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition shrink-0';
-        } else {
-          btn.className = 'platform-tab px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 transition shrink-0';
-        }
+    function formatDate(timestamp) {
+      if (!Number.isFinite(timestamp)) return "Date unavailable";
+
+      return new Intl.DateTimeFormat("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        timeZone: "Asia/Kolkata",
+        timeZoneName: "short"
+      }).format(timestamp);
+    }
+
+    function formatDuration(seconds) {
+      if (!seconds) return "Duration unavailable";
+
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+
+      if (hours && minutes) return `${hours}h ${minutes}m`;
+      if (hours) return `${hours}h`;
+      if (minutes) return `${minutes}m`;
+
+      return `${seconds}s`;
+    }
+
+    function formatCountdown(timestamp) {
+      const difference = timestamp - Date.now();
+
+      if (!Number.isFinite(difference)) return "Time unavailable";
+      if (difference <= 0) return "Started";
+
+      const totalMinutes = Math.floor(difference / 60000);
+      const days = Math.floor(totalMinutes / 1440);
+      const hours = Math.floor((totalMinutes % 1440) / 60);
+      const minutes = totalMinutes % 60;
+
+      if (days > 0) return `In ${days}d ${hours}h`;
+      if (hours > 0) return `In ${hours}h ${minutes}m`;
+
+      return `In ${minutes}m`;
+    }
+
+    function setStatus(online, message) {
+      elements.statusDot.classList.toggle("online", online);
+      elements.statusText.textContent = message;
+    }
+
+    function showMessage(title, description) {
+      elements.contestList.innerHTML = `
+        <div class="message">
+          <strong>${escapeHTML(title)}</strong>
+          <p>${escapeHTML(description)}</p>
+        </div>
+      `;
+    }
+
+    function updateSummary(list) {
+      const now = Date.now();
+      const next24Hours = now + 24 * 60 * 60 * 1000;
+
+      const upcoming = list.filter(contest => {
+        const start = getStartTime(contest);
+        return Number.isFinite(start) && start >= now;
       });
-      renderContests();
+
+      const startingSoon = upcoming.filter(contest => {
+        const start = getStartTime(contest);
+        return start <= next24Hours;
+      });
+
+      const platforms = new Set(
+        list.map(getPlatform).map(platform => platform.toLowerCase())
+      );
+
+      elements.totalCount.textContent = list.length;
+      elements.soonCount.textContent = startingSoon.length;
+      elements.platformCount.textContent = platforms.size;
+    }
+
+    function updatePlatformOptions() {
+      const selected = elements.platformFilter.value;
+
+      const platforms = [...new Set(contests.map(getPlatform))]
+        .sort((a, b) => a.localeCompare(b));
+
+      elements.platformFilter.innerHTML =
+        '<option value="all">All platforms</option>' +
+        platforms.map(platform => `
+          <option value="${escapeHTML(platform)}">
+            ${escapeHTML(platform)}
+          </option>
+        `).join("");
+
+      if (platforms.includes(selected)) {
+        elements.platformFilter.value = selected;
+      }
     }
 
     function renderContests() {
-      const listEl = document.getElementById('contestsList');
-      const countEl = document.getElementById('contestCount');
+      const query = elements.searchInput.value.trim().toLowerCase();
+      const selectedPlatform = elements.platformFilter.value;
 
-      const filtered = currentFilter === 'ALL' 
-        ? allContests 
-        : allContests.filter(c => c.platform === currentFilter);
+      const filtered = contests
+        .filter(contest => {
+          const matchesPlatform =
+            selectedPlatform === "all" ||
+            getPlatform(contest) === selectedPlatform;
 
-      countEl.textContent = `${filtered.length} contests`;
+          const searchableText =
+            `${getContestName(contest)} ${getPlatform(contest)}`
+              .toLowerCase();
+
+          return matchesPlatform && searchableText.includes(query);
+        })
+        .sort((a, b) => getStartTime(a) - getStartTime(b));
 
       if (filtered.length === 0) {
-        listEl.innerHTML = `
-          <div class="glass-card p-6 rounded-xl text-center space-y-2">
-            <p class="text-xs text-slate-400">No upcoming contests found for ${currentFilter}</p>
-          </div>
-        `;
+        showMessage(
+          contests.length ? "No matching contests" : "No contests available",
+          contests.length
+            ? "Try changing your search or platform filter."
+            : "The API returned no contest records."
+        );
         return;
       }
 
-      listEl.innerHTML = filtered.map(c => {
-        const badgeStyle = platformColors[c.platform] || 'bg-slate-800 text-slate-300 border-slate-700';
-        const durationHrs = (c.durationSeconds / 3600).toFixed(1);
-        
+      elements.contestList.innerHTML = filtered.map(contest => {
+        const name = getContestName(contest);
+        const platform = getPlatform(contest);
+        const start = getStartTime(contest);
+        const duration = getDuration(contest);
+        const url = getContestURL(contest);
+        const countdown = formatCountdown(start);
+
+        const isSoon =
+          Number.isFinite(start) &&
+          start > Date.now() &&
+          start - Date.now() <= 24 * 60 * 60 * 1000;
+
+        const link = url
+          ? `<a class="contest-link"
+                href="${escapeHTML(url)}"
+                target="_blank"
+                rel="noopener noreferrer">View contest ↗</a>`
+          : "";
+
         return `
-          <div class="glass-card p-4 rounded-xl space-y-3 hover:border-indigo-500/40 transition">
-            <div class="flex items-center justify-between">
-              <span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${badgeStyle}">
-                ${c.platform}
-              </span>
-              <span class="text-[11px] text-slate-400 font-medium flex items-center gap-1">
-                <i data-lucide="clock" class="w-3 h-3 text-indigo-400"></i> ${durationHrs} hrs
-              </span>
+          <article class="contest">
+            <div class="contest-main">
+              <div class="contest-topline">
+                <span class="platform">${escapeHTML(platform)}</span>
+              </div>
+
+              <h3 class="contest-title">
+                ${url
+                  ? `<a href="${escapeHTML(url)}"
+                       target="_blank"
+                       rel="noopener noreferrer">${escapeHTML(name)}</a>`
+                  : escapeHTML(name)}
+              </h3>
+
+              <div class="contest-meta">
+                <span>${escapeHTML(formatDate(start))}</span>
+                <span>Duration: ${escapeHTML(formatDuration(duration))}</span>
+              </div>
             </div>
 
-            <div>
-              <h3 class="font-semibold text-sm text-slate-100 tracking-tight">${c.name}</h3>
-              <p class="text-xs text-indigo-300 font-medium mt-1 flex items-center gap-1">
-                <i data-lucide="calendar-days" class="w-3.5 h-3.5"></i> ${c.startTimeIst}
-              </p>
-            </div>
-
-            <div class="flex items-center justify-between pt-1 border-t border-slate-800/60">
-              <span class="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> Reminders armed (24h & 30m)
+            <div class="contest-actions">
+              <span class="countdown ${isSoon ? "soon" : ""}">
+                ${escapeHTML(countdown)}
               </span>
-              <a href="${c.url}" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition flex items-center gap-1.5">
-                <span>View</span>
-                <i data-lucide="external-link" class="w-3 h-3"></i>
-              </a>
+              ${link}
             </div>
-          </div>
+          </article>
         `;
-      }).join('');
-
-      lucide.createIcons();
+      }).join("");
     }
 
-    async function triggerTestAlert() {
-      const btn = document.getElementById('testAlertBtn');
-      btn.disabled = true;
-      btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Sending...</span>`;
-      lucide.createIcons();
+    async function loadContests() {
+      elements.refreshButton.disabled = true;
+      elements.refreshButton.textContent = "Loading…";
+
+      setStatus(false, "Connecting…");
 
       try {
-        const res = await fetch(`${API_BASE}/api/preferences/${SEEDED_USER_ID}/test-alert`, {
-          method: 'POST'
+        const response = await fetch(API_URL, {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          cache: "no-store"
         });
-        const data = await res.json();
 
-        if (res.ok) {
-          showToast(`Test alert sent for "${data.contestTested}" across all channels!`, 'success');
-        } else {
-          showToast(data.error || 'Failed to trigger test alert', 'error');
+        if (!response.ok) {
+          throw new Error(`API returned HTTP ${response.status}`);
         }
-      } catch (err) {
-        console.error(err);
-        showToast('Network error triggering test alert', 'error');
+
+        const data = await response.json();
+
+        // Accept either { contests: [...] } or a direct array.
+        const records = Array.isArray(data)
+          ? data
+          : data?.contests;
+
+        if (!Array.isArray(records)) {
+          throw new Error(
+            "Unexpected API response. Expected an array of contests."
+          );
+        }
+
+        contests = records;
+
+        updateSummary(contests);
+        updatePlatformOptions();
+        renderContests();
+
+        elements.lastUpdated.textContent =
+          `Last updated at ${new Intl.DateTimeFormat("en-IN", {
+            hour: "numeric",
+            minute: "2-digit",
+            second: "2-digit"
+          }).format(new Date())}`;
+
+        setStatus(true, "API connected");
+      } catch (error) {
+        console.error("Unable to load contests:", error);
+
+        setStatus(false, "Connection failed");
+
+        showMessage(
+          "Unable to load contests",
+          "Check that the backend is running and /api/contests/upcoming returns valid JSON."
+        );
+
+        elements.lastUpdated.textContent = "Could not fetch contest data";
       } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<i data-lucide="bell" class="w-3.5 h-3.5"></i><span>Test Alert</span>`;
-        lucide.createIcons();
+        elements.refreshButton.disabled = false;
+        elements.refreshButton.textContent = "↻ Refresh";
       }
     }
 
-    async function triggerSync() {
-      const icon = document.getElementById('syncNavIcon');
-      icon.classList.add('animate-spin');
+    elements.refreshButton.addEventListener("click", loadContests);
+    elements.searchInput.addEventListener("input", renderContests);
+    elements.platformFilter.addEventListener("change", renderContests);
 
-      try {
-        const res = await fetch(`${API_BASE}/api/contests/sync`, { method: 'POST' });
-        const data = await res.json();
-        if (res.ok) {
-          showToast('Contests successfully synced from all 4 platforms!', 'success');
-          fetchContests();
-        } else {
-          showToast('Sync completed with warnings', 'info');
-        }
-      } catch (err) {
-        showToast('Failed to sync contests', 'error');
-      } finally {
-        icon.classList.remove('animate-spin');
-      }
-    }
+    // Refresh countdown labels without making repeated API requests.
+    setInterval(() => {
+      if (contests.length > 0) renderContests();
+    }, 60_000);
 
-    // Initial load
-    document.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
-      fetchContests();
-    });
+    loadContests();
   </script>
 </body>
 </html>
