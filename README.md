@@ -291,7 +291,7 @@ curl -X POST http://localhost:4000/api/v1/notifications/test
 ## 🗺️ 7. Implementation Roadmap
 
 - [x] **Phase 0:** System Architecture & High-Scale Design Specification
-- [ ] **Phase 1:** Core Infrastructure Setup (`package.json`, Docker Compose, Zod Env Config, Drizzle Schema & Migrations)
-- [ ] **Phase 2:** Multi-Platform Ingestion Engine (Codeforces, LeetCode, CodeChef, and AtCoder Providers + Upsert Service)
-- [ ] **Phase 3:** Two-Stage BullMQ Scheduler (`contest-trigger-queue` + Cursor-Paginated `FanOutService`)
-- [ ] **Phase 4:** Multi-Channel Notification Dispatchers (`ntfy.sh` Phone Push + HTML Email + Seed Script & End-to-End Test)
+- [x] **Phase 1:** Core Infrastructure Setup (`package.json`, Docker Compose, Zod Env Config, Drizzle Schema & Migrations)
+- [x] **Phase 2:** Multi-Platform Ingestion Engine (Codeforces, LeetCode, CodeChef, and AtCoder Providers + Upsert Service)
+- [x] **Phase 3:** Two-Stage BullMQ Scheduler (`contest-trigger-queue` + Cursor-Paginated `FanOutService`)
+- [x] **Phase 4:** Multi-Channel Notification Dispatchers (`ntfy.sh` Phone Push + HTML Email + Seed Script & End-to-End Test)
