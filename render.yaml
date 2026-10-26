@@ -1,5 +1,5 @@
 services:
-  # 1. Express REST API Service
+  # 1. Express REST API & Mobile PWA Web Service
   - type: web
     name: pulsecp-api
     env: node
@@ -30,13 +30,13 @@ services:
       - key: SMTP_PORT
         value: 587
       - key: SMTP_USER
-        sync: false # Set securely in Render Dashboard
+        sync: false
       - key: SMTP_PASS
-        sync: false # Set securely in Render Dashboard
+        sync: false
       - key: TELEGRAM_BOT_TOKEN
-        sync: false # Set securely in Render Dashboard
+        sync: false
 
-  # 2. BullMQ Background Worker Service
+  # 2. BullMQ 24/7 Background Worker Service
   - type: worker
     name: pulsecp-worker
     env: node
