@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Production Build Output
+dist/
+build/
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.production
+.env.development
+
+# Logs & Process Manager Files
+logs/
+*.log
+pids/
+*.pid
+*.seed
+*.pid.lock
+pm2.log
+
+# OS & Editor Specific Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace

@@ -1,0 +1,71 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: pulsecp_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pulsecp_user
+      POSTGRES_PASSWORD: pulsecp_password
+      POSTGRES_DB: pulsecp_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pulsecp_user -d pulsecp_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: pulsecp_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory-policy noeviction
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: pulsecp_api
+    restart: unless-stopped
+    command: node dist/app.js
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://pulsecp_user:pulsecp_password@postgres:5432/pulsecp_db
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build: .
+    container_name: pulsecp_worker
+    restart: unless-stopped
+    command: node dist/worker.js
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://pulsecp_user:pulsecp_password@postgres:5432/pulsecp_db
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  pg_data:
+  redis_data:
